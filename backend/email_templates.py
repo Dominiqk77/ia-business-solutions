@@ -37,6 +37,48 @@ Référence : {reference}
 3. Besoin d'aide ?
    → WhatsApp : https://wa.me/212607798670
    → Email : ia@dominiqkmendy.com
+
+📧 Votre facture est en pièce jointe.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔗 DÉCOUVREZ L'ÉCOSYSTÈME MILLENNIUM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💳 Besoin de paiements en ligne ? → https://www.sene-pay.com
+📄 Besoin de factures électroniques ? → https://mafacturepro.sn
+🏛️ Besoin de solutions B2G ? → https://senadmin.com
+
+En tant que client IA Business Solutions, bénéficiez de -10% sur tous nos autres services avec le code MILLENNIUM10.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Merci pour votre confiance. On est là pour vous aider à automatiser votre entreprise.
+
+Bien à toi,
+
+Dominiqk Mendy
+Fondateur — IA Business Solutions
++212 607 798 670
+ia@dominiqkmendy.com
+https://ai.dominiqkmendy.com
+Plan : {plan_name}
+Montant : {amount}€ / {period}
+Référence : {reference}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 PROCHAINES ÉTAPES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Accédez à votre dashboard :
+   → https://ai.dominiqkmendy.com/app/dashboard.html
+   Email : {email}
+   Mot de passe : {temp_password}
+
+2. Configurez votre solution :
+   Uploadez vos documents, personnalisez le bot,
+   et copiez le code widget sur votre site.
+
+3. Besoin d'aide ?
+   → WhatsApp : https://wa.me/212607798670
+   → Email : ia@dominiqkmendy.com
    → Support : https://ai.dominiqkmendy.com/app/dashboard.html
 
 📧 Votre facture est en pièce jointe.
