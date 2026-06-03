@@ -1,443 +1,282 @@
 /**
- * IA Business Solutions — Chatbot Widget v1.0
- * Widget JS 1-clic pour chatbot IA clé en main
+ * IA Business Solutions - Chatbot Widget v2.0
+ * Widget JS 1-clic UNIVERSEL - Compatible tous frameworks
  * 
  * Usage: <script src="https://ai.dominiqkmendy.com/widget/chatbot-widget.js" data-bot-id="CLIENT_ID" data-theme="dark"></script>
  * 
- * Aucun secret/token client — toutes les clés API sont côté serveur (CF Pages env vars)
+ * Detection automatique du site et configuration contextuelle.
+ * Aucun secret/token cote client.
  */
 (function(){
   'use strict';
-
-  // ── Configuration depuis les data-attributes ──
+  
+  // ── Detection du site ──
+  var hostname = window.location.hostname;
+  var sitePresets = {
+    'sene-pay.com': { botId: 'SENEPAY_LEAD', theme: 'light', color: '#F59E0B', greeting: 'Bonjour ! Je suis l\'assistant SenePay. Je peux vous aider avec nos solutions IA.' },
+    'mafacturepro.sn': { botId: 'MAFACTUREPRO_LEAD', theme: 'dark', color: '#C7772E', greeting: 'Bonjour ! Je suis l\'assistant MaFacturePro. Découvrez nos solutions IA pour votre entreprise.' },
+    'senadmin.com': { botId: 'SENADMIN_LEAD', theme: 'dark', color: '#6C5CE7', greeting: 'Bonjour ! Assistant SenAdmin. Besoin d\'automatiser vos processus ?' }
+  };
+  
+  var preset = null;
+  for (var d in sitePresets) { if (hostname.indexOf(d) !== -1) { preset = sitePresets[d]; break; } }
+  
+  // ── Configuration ──
   var scriptTag = document.currentScript || (function(){var s=document.querySelectorAll('script[src*="chatbot-widget"]');return s[s.length-1];})();
-  var BOT_ID = scriptTag.getAttribute('data-bot-id') || '';
-  var THEME = scriptTag.getAttribute('data-theme') || 'dark';
+  var BOT_ID = (preset ? preset.botId : null) || scriptTag.getAttribute('data-bot-id') || '';
+  var THEME = (preset ? preset.theme : null) || scriptTag.getAttribute('data-theme') || 'dark';
   var API_BASE = 'https://ai.dominiqkmendy.com';
-
-  // ── Validate bot_id ──
-  if(!BOT_ID){
-    console.warn('[ChatbotWidget] data-bot-id manquant. Le widget ne sera pas initialisé.');
-    return;
-  }
-
-  // ── Free tier limit ──
   var FREE_LIMIT = 10;
   var sessionMsgCount = 0;
   var visitorEmail = '';
   var emailCollected = false;
   var sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2,9);
-
-  // ── CSS injection ──
+  var widgetOpen = false;
+  
+  if (!BOT_ID) { console.warn('[ChatbotWidget] data-bot-id manquant'); return; }
+  
+  // ── Thème couleurs ──
   var isDark = THEME === 'dark';
   var colors = {
     bg: isDark ? '#12121c' : '#ffffff',
     bg2: isDark ? '#1a1a2e' : '#f5f5f7',
-    header: isDark ? '#6C5CE7' : '#6C5CE7',
+    header: (preset ? preset.color : null) || '#6C5CE7',
     text: isDark ? '#e8e8f0' : '#1a1a2e',
     text2: isDark ? '#9090a8' : '#6b6b80',
     border: isDark ? '#1e1e2e' : '#e0e0e8',
-    accent: '#6C5CE7',
-    accent2: '#a29bfe',
+    accent: (preset ? preset.color : null) || '#6C5CE7',
     userMsg: isDark ? '#6C5CE7' : '#6C5CE7',
     botMsg: isDark ? '#1e1e2e' : '#f0f0f5',
-    inputBg: isDark ? '#0e0e14' : '#ffffff',
-    white: '#ffffff',
-    green: '#00b894',
-    shadow: '0 8px 40px rgba(0,0,0,0.3)'
+    inputBg: isDark ? '#0e0e14' : '#ffffff'
   };
-
+  
+  // ── CSS ──
   var css = `
-  .cbw-reset{all:unset;box-sizing:border-box}
-  .cbw-reset *{box-sizing:border-box;margin:0;padding:0}
-  @keyframes cbw-bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-  @keyframes cbw-slideUp{from{opacity:0;transform:translateY(20px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
-  @keyframes cbw-fadeIn{from{opacity:0}to{opacity:1}}
-  @keyframes cbw-typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
-  .cbw-fab{position:fixed;bottom:24px;right:24px;z-index:99999;width:60px;height:60px;border-radius:50%;background:${colors.accent};border:none;cursor:pointer;box-shadow:0 4px 24px rgba(108,92,231,.4);display:flex;align-items:center;justify-content:center;transition:all .3s;font-size:28px;animation:cbw-bounce 2s infinite}
-  .cbw-fab:hover{transform:scale(1.1);box-shadow:0 6px 32px rgba(108,92,231,.5)}
-  .cbw-fab.hidden{display:none}
-  .cbw-window{position:fixed;bottom:24px;right:24px;z-index:99999;width:380px;height:560px;max-height:80vh;border-radius:20px;overflow:hidden;box-shadow:${colors.shadow};font-family:'Segoe UI',system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;animation:cbw-slideUp .3s ease;transition:all .3s}
-  .cbw-window.cbw-light{background:${colors.bg};border:1px solid ${colors.border}}
-  .cbw-window.cbw-dark{background:${colors.bg};border:1px solid ${colors.border}}
-  .cbw-window.cbw-minimized{height:60px!important;overflow:hidden}
-  .cbw-window.cbw-closed{display:none}
-  .cbw-header{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;background:${colors.header};color:${colors.white};cursor:pointer;user-select:none}
-  .cbw-header-left{display:flex;align-items:center;gap:10px}
-  .cbw-avatar{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-  .cbw-title-text{font-size:.95rem;font-weight:700}
-  .cbw-subtitle{font-size:.7rem;opacity:.8;font-weight:400}
-  .cbw-header-btns{display:flex;gap:4px}
-  .cbw-hdr-btn{background:rgba(255,255,255,.15);border:none;color:${colors.white};width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.2s}
-  .cbw-hdr-btn:hover{background:rgba(255,255,255,.3)}
-  .cbw-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min:0}
-  .cbw-messages::-webkit-scrollbar{width:4px}
-  .cbw-messages::-webkit-scrollbar-track{background:transparent}
-  .cbw-messages::-webkit-scrollbar-thumb{background:${colors.border};border-radius:4px}
-  .cbw-msg{display:flex;gap:8px;max-width:85%;animation:cbw-fadeIn .3s ease}
-  .cbw-msg{align-self:flex-end}
-  .cbw-msg-bot{align-self:flex-start}
-  .cbw-msg-avatar{width:28px;height:28px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px}
-  .cbw-msg-bot .cbw-msg-avatar{background:${colors.header};color:#fff}
-  .cbw-msg-user .cbw-msg-avatar{background:${colors.accent};color:#fff;order:2}
-  .cbw-msg-bubble{padding:10px 14px;border-radius:16px;font-size:.85rem;line-height:1.5;word-wrap:break-word}
-  .cbw-msg-bot .cbw-msg-bubble{background:${colors.botMsg};color:${colors.text};border-bottom-left-radius:4px}
-  .cbw-msg-user .cbw-msg-bubble;background:${colors.userMsg};color:#fff;border-bottom-right-radius:4px;order:1;margin-right:8px}
-  .cbw-typing{display:flex;gap:4px;padding:12px 16px;background:${colors.botMsg};border-radius:16px;border-bottom-left-radius:4px;width:52px;align-self:flex-start}
-  .cbw-typing span{width:7px;height:7px;border-radius:50%;background:${colors.accent};display:inline-block}
-  .cbw-typing span:nth-child(1){animation:cbw-typing .6s .0s infinite}
-  .cbw-typing span:nth-child(2){animation:cbw-typing .6s .15s infinite}
-  .cbw-typing span:nth-child(3){animation:cbw-typing .6s .3s infinite}
-  .cbw-email-collect{padding:20px;text-align:center;animation:cbw-fadeIn .3s ease}
-  .cbw-email-collect h3{font-size:1rem;color:${colors.text};margin-bottom:6px}
-  .cbw-email-collect p{font-size:.78rem;color:${colors.text2};margin-bottom:16px}
-  .cbw-email-input{width:100%;padding:11px 14px;border:1px solid ${colors.border};border-radius:10px;background:${colors.inputBg};color:${colors.text};font-size:.85rem;font-family:inherit;margin-bottom:10px;outline:none;transition:.2s}
-  .cbw-email-input:focus{border-color:${colors.accent};box-shadow:0 0 0 3px rgba(108,92,231,.1)}
-  .cbw-email-btn{width:100%;padding:11px;border:none;border-radius:10px;background:${colors.accent};color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
-  .cbw-email-btn:hover{background:${colors.accent2}}
-  .cbw-email-btn:disabled{opacity:.6;cursor:not-allowed}
-  .cbw-error-msg{font-size:.75rem;color:#ff6b6b;margin-top:8px;display:none}
-  .cbw-input-area{padding:12px 14px;border-top:1px solid ${colors.border};display:flex;gap:8px;align-items:center;background:${colors.bg}}
-  .cbw-input{flex:1;padding:10px 14px;border:1px solid ${colors.border};border-radius:22px;background:${colors.inputBg};color:${colors.text};font-size:.85rem;font-family:inherit;outline:none;transition:.2s}
-  .cbw-input:focus{border-color:${colors.accent};box-shadow:0 0 0 3px rgba(108,92,231,.1)}
-  .cbw-input::placeholder{color:${colors.text2}}
-  .cbw-send{width:40px;height:40px;border-radius:50%;border:none;background:${colors.accent};color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
-  .cbw-send:hover{background:${colors.accent2}}
-  .cbw-send:disabled{opacity:.4;cursor:not-allowed}
-  .cbw-upgrade{padding:10px 14px;text-align:center;background:linear-gradient(135deg,rgba(108,92,231,.08),rgba(253,121,168,.05));border-top:1px solid ${colors.border}}
-  .cbw-upgrade a{font-size:.78rem;color:${colors.accent2};text-decoration:none;font-weight:600}
-  .cbw-upgrade a:hover{text-decoration:underline}
-  .cbw-counter{font-size:.68rem;color:${colors.text2};text-align:center;padding:4px}
-  .cbw-reached .cbw-input-area{display:none}
-  @media(max-width:440px){.cbw-window{width:calc(100% - 24px);right:12px;bottom:12px;height:70vh;max-height:70vh}}
-  `;
-
-  var styleEl = document.createElement('style');
-  styleEl.textContent = css;
-  document.head.appendChild(styleEl);
-
-  // ── DOM Construction ──
-  var container = document.createElement('div');
-  container.className = 'cbw-reset';
-  document.body.appendChild(container);
-
-  // FAB button
-  var fab = document.createElement('button');
-  fab.className = 'cbw-fab';
-  fab.innerHTML = '💬';
-  fab.setAttribute('aria-label', 'Ouvrir le chat');
-  container.appendChild(fab);
-
-  // Chat window
-  var win = document.createElement('div');
-  win.className = 'cbw-window cbw-' + (isDark?'dark':'light') + ' cbw-closed';
-  container.appendChild(win);
-
-  // Header
-  var header = document.createElement('div');
-  header.className = 'cbw-header';
-  header.innerHTML = '<div class="cbw-header-left"><div class="cbw-avatar">🤖</div><div><div class="cbw-title-text">Assistant IA</div><div class="cbw-subtitle"></div></div></div>';
-  var hdrBtns = document.createElement('div');
-  hdrBtns.className = 'cbw-header-btns';
-  var btnMin = document.createElement('button');
-  btnMin.className = 'cbw-hdr-btn';
-  btnMin.innerHTML = '−';
-  btnMin.setAttribute('aria-label', 'Minimiser');
-  var btnClose = document.createElement('button');
-  btnClose.className = 'cbw-hdr-btn';
-  btnClose.innerHTML = '×';
-  btnClose.setAttribute('aria-label', 'Fermer');
-  hdrBtns.appendChild(btnMin);
-  hdrBtns.appendChild(btnClose);
-  header.appendChild(hdrBtns);
-  win.appendChild(header);
-
-  // Messages area
-  var msgsDiv = document.createElement('div');
-  msgsDiv.className = 'cbw-messages';
-  win.appendChild(msgsDiv);
-
-  // Email collection area
-  var emailDiv = document.createElement('div');
-  emailDiv.className = 'cbw-email-collect';
-  emailDiv.style.display = 'none';
-  emailDiv.innerHTML = '<h3>👋 Bonjour !</h3><p>Pour commencer, entrez votre email. C\'est gratuit !</p><input type="email" class="cbw-email-input" placeholder="votre@email.com" required><button class="cbw-email-btn">Démarrer la conversation →</button><div class="cbw-error-msg">Veuillez entrer un email valide.</div>';
-  win.appendChild(emailDiv);
-
-  // Input area
-  var inputArea = document.createElement('div');
-  inputArea.className = 'cbw-input-area';
-  inputArea.style.display = 'none';
-  var textInput = document.createElement('input');
-  textInput.type = 'text';
-  textInput.className = 'cbw-input';
-  textInput.placeholder = 'Tapez votre message...';
-  var sendBtn = document.createElement('button');
-  sendBtn.className = 'cbw-send';
-  sendBtn.innerHTML = '➤';
-  sendBtn.disabled = true;
-  inputArea.appendChild(textArea=textInput);
-  inputArea.appendChild(sendBtn);
-  win.appendChild(inputArea);
-
-  // Message counter
-  var counterDiv = document.createElement('div');
-  counterDiv.className = 'cbw-counter';
-  counterDiv.style.display = 'none';
-  win.appendChild(counterDiv);
-
-  // Upgrade banner
-  var upgradeDiv = document.createElement('div');
-  upgradeDiv.className = 'cbw-upgrade';
-  upgradeDiv.style.display = 'none';
-  upgradeDiv.innerHTML = '<a href="https://ai.dominiqkmendy.com/#tarifs" target="_blank">⚡ Passez en Pro pour des réponses illimitées</a>';
-  win.appendChild(upgradeDiv);
-
-  // ── State ──
-  var isOpen = false;
-  var isMinimized = false;
-  var messages = [];
-  var isWaitingForReply = false;
-
-  // ── Subtitle text from bot config ──
-  fetch(API_BASE + '/api/bot-config?id=' + encodeURIComponent(BOT_ID))
-    .then(function(r){ return r.json(); })
-    .then(function(cfg){
-      if(cfg && cfg.welcome_header){
-        header.querySelector('.cbw-subtitle').textContent = cfg.welcome_header;
-      } else {
-        header.querySelector('.cbw-subtitle').textContent = 'En ligne • Répond instantanément';
-      }
-      if(cfg && cfg.welcome_message){
-        addBotMsg(cfg.welcome_message);
-      }
-      if(cfg && cfg.primary_color){
-        applyColor(cfg.primary_color);
-      }
-    })
-    .catch(function(){
-      header.querySelector('.cbw-subtitle').textContent = 'En ligne • Répond instantanément';
-    });
-
-  function applyColor(hex){
-    colors.accent = hex;
-    // Update key elements dynamically
-    fab.style.background = hex;
-    sendBtn.style.background = hex;
-    header.style.background = hex;
+  #ia-chatbot *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif}
+  #ia-chatbot-launcher{position:fixed;bottom:24px;right:24px;z-index:99999;width:56px;height:56px;border-radius:50%;background:${colors.accent};color:#fff;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:24px;transition:.3s}
+  #ia-chatbot-launcher:hover{transform:scale(1.1)}
+  #ia-chatbot{position:fixed;bottom:90px;right:24px;z-index:99999;width:380px;height:520px;background:${colors.bg};border:1px solid ${colors.border};border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.4);display:none;flex-direction:column;overflow:hidden}
+  #ia-chatbot.open{display:flex}
+  .ia-cb-header{background:${colors.header};color:#fff;padding:16px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .ia-cb-header .title{font-weight:700;font-size:.95rem;flex:1}
+  .ia-cb-header .close-btn{background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+  .ia-cb-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+  .ia-cb-msg{padding:10px 14px;border-radius:14px;font-size:.85rem;line-height:1.5;max-width:85%}
+  .ia-cb-msg.bot{background:${colors.botMsg};color:${colors.text};border:1px solid ${colors.border};align-self:flex-start}
+  .ia-cb-msg.user{background:${colors.accent};color:#fff;align-self:flex-end}
+  .ia-cb-msg.error{background:#e74c3c20;color:#e74c3c;border:1px solid #e74c3c40;align-self:flex-start}
+  .ia-cb-msg.upgrade{background:linear-gradient(135deg,rgba(108,92,231,.1),rgba(0,184,148,.05));border:1px solid ${colors.accent};color:${colors.text};align-self:flex-start;text-align:center}
+  .ia-cb-msg.upgrade a{color:${colors.accent};font-weight:700}
+  .ia-cb-typing{padding:10px 14px;color:${colors.text2};font-size:.8rem;font-style:italic}
+  .ia-cb-input{border-top:1px solid ${colors.border};padding:12px;display:flex;gap:8px;flex-shrink:0;background:${colors.bg2}}
+  .ia-cb-input input{flex:1;padding:10px 14px;border:1px solid ${colors.border};border-radius:10px;background:${colors.inputBg};color:${colors.text};font-size:.85rem;outline:none}
+  .ia-cb-input input:focus{border-color:${colors.accent}}
+  .ia-cb-input button{background:${colors.accent};color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:700;font-size:.8rem;white-space:nowrap}
+  .ia-cb-email-collect{padding:16px;text-align:center}
+  .ia-cb-email-collect input{width:100%;margin:8px 0;padding:10px 14px;border:1px solid ${colors.border};border-radius:10px;background:${colors.inputBg};color:${colors.text};font-size:.85rem;outline:none}
+  .ia-cb-email-collect button{width:100%;padding:10px;background:${colors.accent};color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:700}
+  .ia-cb-footer{text-align:center;padding:6px;font-size:.65rem;color:${colors.text2};border-top:1px solid ${colors.border}}
+  .ia-cb-footer a{color:${colors.accent}}
+  @media(max-width:480px){
+    #ia-chatbot{width:calc(100% - 32px);right:16px;bottom:80px;height:70vh}
+    #ia-chatbot-launcher{bottom:16px;right:16px}
   }
-
-  // ── Event Handlers ──
-  fab.addEventListener('click', openChat);
-  btnClose.addEventListener('click', closeChat);
-  btnMin.addEventListener('click', toggleMinimize);
-
-  header.addEventListener('click', function(e){
-    if(e.target === header || e.target.closest('.cbw-header-left')){
-      if(isMinimized) toggleMinimize();
+  `;
+  
+  var style = document.createElement('style');
+  style.textContent = css;
+  document.head.appendChild(style);
+  
+  // ── HTML ──
+  var launcher = document.createElement('button');
+  launcher.id = 'ia-chatbot-launcher';
+  launcher.innerHTML = '💬';
+  launcher.title = 'Assistant IA';
+  launcher.onclick = toggleWidget;
+  document.body.appendChild(launcher);
+  
+  var widget = document.createElement('div');
+  widget.id = 'ia-chatbot';
+  widget.innerHTML = `
+    <div class="ia-cb-header">
+      <span class="title">🤖 Assistant IA</span>
+      <button class="close-btn" onclick="document.getElementById('ia-chatbot').classList.remove('open');widgetOpen=false">✕</button>
+    </div>
+    <div class="ia-cb-messages" id="iaCbMsgs"></div>
+    <div class="ia-cb-input">
+      <input type="text" id="iaCbInput" placeholder="Tapez votre message..." onkeydown="if(event.key==='Enter'){iaSendMessage()}">
+      <button onclick="iaSendMessage()">Envoyer</button>
+    </div>
+    <div class="ia-cb-footer">Propulsé par <a href="${API_BASE}" target="_blank">IA Business Solutions</a></div>
+  `;
+  document.body.appendChild(widget);
+  
+  // Exposer les fonctions globalement
+  window.iaSendMessage = sendMessage;
+  
+  function toggleWidget() {
+    widgetOpen = !widgetOpen;
+    widget.classList.toggle('open', widgetOpen);
+    if (widgetOpen && !emailCollected) {
+      requestEmail();
+    } else if (widgetOpen && emailCollected) {
+      showMessage('bot', (preset ? preset.greeting : 'Bonjour ! Comment puis-je vous aider ?'));
     }
-  });
-
-  // Email collection
-  var emailInput = emailDiv.querySelector('.cbw-email-input');
-  var emailBtn = emailDiv.querySelector('.cbw-email-btn');
-  var emailError = emailDiv.querySelector('.cbw-error-msg');
-
-  emailBtn.addEventListener('click', startChat);
-  emailInput.addEventListener('keypress', function(e){ if(e.key==='Enter') startChat(); });
-
-  function startChat(){
-    var email = emailInput.value.trim().toLowerCase();
-    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-      emailError.style.display = 'block';
-      return;
-    }
+  }
+  
+  // Close button
+  widget.querySelector('.close-btn').onclick = function() {
+    widget.classList.remove('open');
+    widgetOpen = false;
+  };
+  
+  function requestEmail() {
+    var msgs = document.getElementById('iaCbMsgs');
+    msgs.innerHTML = '';
+    var emailDiv = document.createElement('div');
+    emailDiv.className = 'ia-cb-email-collect';
+    emailDiv.innerHTML = `
+      <div style="font-weight:700;margin-bottom:8px;color:${colors.text}">👋 Bienvenue !</div>
+      <div style="font-size:.85rem;color:${colors.text2};margin-bottom:12px">Pour commencer, entrez votre email. C'est gratuit.</div>
+      <input type="email" id="iaCbEmailInput" placeholder="votre@email.com" onkeydown="if(event.key==='Enter'){iaCollectEmail()}">
+      <button onclick="iaCollectEmail()">Commencer →</button>
+    `;
+    msgs.appendChild(emailDiv);
+  }
+  
+  window.iaCollectEmail = function() {
+    var email = document.getElementById('iaCbEmailInput').value.trim();
+    if (!email || email.indexOf('@') === -1) { alert('Email invalide'); return; }
     visitorEmail = email;
     emailCollected = true;
-    emailDiv.style.display = 'none';
-    inputArea.style.display = 'flex';
-    counterDiv.style.display = 'block';
-    textInput.focus();
-    updateCounter();
-    // Store lead
-    fetch(API_BASE + '/api/lead', {
+    
+    // Stocker le lead
+    fetch(API_BASE + '/api/leads', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({email: email, bot_id: BOT_ID, source: window.location.href})
+      body: JSON.stringify({email: email, bot_id: BOT_ID, source: hostname, ts: Date.now()})
     }).catch(function(){});
+    
+    var msgs = document.getElementById('iaCbMsgs');
+    msgs.innerHTML = '';
+    showMessage('bot', (preset ? preset.greeting : 'Bonjour ! Comment puis-je vous aider aujourd\'hui ?'));
+  };
+  
+  function showMessage(role, text, extraClass) {
+    var msgs = document.getElementById('iaCbMsgs');
+    var msg = document.createElement('div');
+    msg.className = 'ia-cb-msg ' + role + (extraClass ? ' ' + extraClass : '');
+    msg.textContent = text;
+    msgs.appendChild(msg);
+    msgs.scrollTop = msgs.scrollHeight;
   }
-
-  // Message sending
-  sendBtn.addEventListener('click', sendMsg);
-  textInput.addEventListener('keypress', function(e){ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMsg(); } });
-  textInput.addEventListener('input', function(){ sendBtn.disabled = textInput.value.trim().length === 0 || isWaitingForReply; });
-
-  function sendMsg(){
-    if(isWaitingForReply) return;
-    var txt = textInput.value.trim();
-    if(!txt) return;
-
-    // Check free tier limit
-    if(sessionMsgCount >= FREE_LIMIT && !visitorEmail){
-      showUpgradePrompt();
+  
+  function showTyping() {
+    var msgs = document.getElementById('iaCbMsgs');
+    var typing = document.createElement('div');
+    typing.className = 'ia-cb-typing';
+    typing.id = 'iaCbTyping';
+    typing.textContent = 'L\'IA écrit...';
+    msgs.appendChild(typing);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+  
+  function hideTyping() {
+    var t = document.getElementById('iaCbTyping');
+    if (t) t.remove();
+  }
+  
+  function sendMessage() {
+    var input = document.getElementById('iaCbInput');
+    var text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    
+    showMessage('user', text);
+    sessionMsgCount++;
+    
+    if (sessionMsgCount > FREE_LIMIT) {
+      showMessage('bot', 'Vous avez atteint la limite gratuite de ' + FREE_LIMIT + ' messages. Passez au Pro pour continuer !', 'upgrade');
+      var upgradeLink = document.createElement('div');
+      upgradeLink.style.marginTop = '8px';
+      upgradeLink.innerHTML = '<a href="' + API_BASE + '/#tarifs" target="_blank" style="color:' + colors.accent + ';font-weight:700">Voir les plans →</a>';
+      document.getElementById('iaCbMsgs').appendChild(upgradeLink);
       return;
     }
-
-    textInput.value = '';
-    sendBtn.disabled = true;
-    sessionMsgCount++;
-    updateCounter();
-
-    addUserMsg(txt);
-    addTyping();
-    isWaitingForReply = true;
-
-    fetch(API_BASE + '/api/chat', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        messages: messages,
-        bot_id: BOT_ID,
-        session_id: sessionId,
-        visitor_email: visitorEmail
-      })
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      removeTyping();
-      isWaitingForReply = false;
-      sendBtn.disabled = false;
-
-      if(data.limit_reached){
-        showUpgradePrompt();
-        addBotMsg("Vous avez atteint la limite de " + FREE_LIMIT + " messages/jour du plan gratuit. 🎯\\n\\nPassez au <strong>Pro à 29€/mois</strong> pour des réponses illimitées !\\n\\n👉 <a href='https://ai.dominiqkmendy.com/#tarifs' target='_blank' style='color:#6C58E7'>Voir les plans</a>");
-      } else if(data.error){
-        addBotMsg("Désolé, une erreur s'est produite. Veuillez réessayer.");
-        console.error('[ChatbotWidget]', data.error);
-      } else if(data.reply){
-        addBotMsg(data.reply);
-        if(data.nearing_limit){
-          upgradeDiv.style.display = 'block';
-        }
-        if(data.show_upgrade){
-          showUpgradePrompt();
-        }
+    
+    showTyping();
+    
+    // Messages specifiques au site
+    var siteResponses = {
+      'sene-pay': {
+        'paiement': 'SenePay accepte Orange Money, Wave et Free Money. Intégration en 5 minutes. 1.8% flat. Voulez-vous un devis ?',
+        'tarif': 'Nos tarifs commencent à 1.8% par transaction. Pas de frais cachés. Pas de frais d\'inscription.',
+        'intégration': 'L\'intégration prend 5 minutes. API REST, plugins WordPress et Shopify disponibles. Documentation : https://docs.sene-pay.com'
+      },
+      'mafacturepro': {
+        'facture': 'MaFacturePro génère des factures électroniques conformes aux normes sénégalaises. Dès 29€/mois.',
+        'dgi': 'Nos factures sont 100% conformes aux exigences de la DGI Sénégal. Export PDF, envoi automatique, archivage.'
       }
-    })
-    .catch(function(err){
-      removeTyping();
-      isWaitingForReply = false;
-      sendBtn.disabled = false;
-      addBotMsg("Désolé, le service est temporairement indisponible. Veuillez réessayer dans un instant.");
-      console.error('[ChatbotWidget] API error:', err);
-    });
-  }
-
-  // ── DOM helpers ──
-  function addUserMsg(text){
-    var m = {role:'user', content:text};
-    messages.push(m);
-    renderMsg('user', text);
-    scrollBottom();
-  }
-
-  function addBotMsg(text){
-    var m = {role:'assistant', content:text};
-    messages.push(m);
-    renderMsg('bot', text);
-    scrollBottom();
-  }
-
-  function renderMsg(type, text){
-    var d = document.createElement('div');
-    d.className = 'cbw-msg cbw-msg-' + type;
-    var avatar = document.createElement('div');
-    avatar.className = 'cbw-msg-avatar';
-    avatar.textContent = type === 'bot' ? '🤖' : '👤';
-    var bubble = document.createElement('div');
-    bubble.className = 'cbw-msg-bubble';
-    bubble.innerHTML = formatText(text);
-    d.appendChild(avatar);
-    d.appendChild(bubble);
-    msgsDiv.appendChild(d);
-  }
-
-  function formatText(t){
-    // Basic formatting: line breaks + bold + links
-    return t
-      .replace(/&/g,'&amp;')
-      .replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;')
-      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-      .replace(/\n/g,'<br>')
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,'<a href="$2" target="_blank" style="color:#6C5CE7;text-decoration:underline">$1</a>')
-      .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" style="color:#6C5CE7;text-decoration:underline">$1</a>');
-  }
-
-  function addTyping(){
-    var d = document.createElement('div');
-    d.className = 'cbw-typing';
-    d.id = 'cbw-typing';
-    d.innerHTML = '<span></span><span></span><span></span>';
-    msgsDiv.appendChild(d);
-    scrollBottom();
-  }
-
-  function removeTyping(){
-    var t = document.getElementById('cbw-typing');
-    if(t) t.remove();
-  }
-
-  function scrollBottom(){
-    requestAnimationFrame(function(){
-      msgsDiv.scrollTop = msgsDiv.scrollHeight;
-    });
-  }
-
-  function updateCounter(){
-    if(visitorEmail){
-      var remaining = Math.max(0, FREE_LIMIT - sessionMsgCount);
-      if(remaining <= 3 && remaining > 0){
-        counterDiv.textContent = remaining + ' message(s) gratuit(s) restant(s)';
-        counterDiv.style.color = '#ffd700';
-      } else if(remaining === 0){
-        counterDiv.textContent = 'Limite atteinte — Passez en Pro';
-        counterDiv.style.color = '#ff6b6b';
-      } else {
-        counterDiv.textContent = '';
+    };
+    
+    // Chercher une reponse specifique
+    var lowerText = text.toLowerCase();
+    var responded = false;
+    for (var site in siteResponses) {
+      if (hostname.indexOf(site) !== -1) {
+        for (var keyword in siteResponses[site]) {
+          if (lowerText.indexOf(keyword) !== -1) {
+            setTimeout(function(response) {
+              hideTyping();
+              showMessage('bot', response);
+            }, 800, siteResponses[site][keyword]);
+            responded = true;
+            break;
+          }
+        }
       }
     }
+    
+    if (!responded) {
+      // Appeler l'API IA
+      fetch(API_BASE + '/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          messages: [{role: 'user', content: text}],
+          bot_id: BOT_ID,
+          session_id: sessionId,
+          visitor_email: visitorEmail
+        })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        hideTyping();
+        if (data.limit_reached) {
+          showMessage('bot', 'Limite gratuite atteinte. Passez au Pro !', 'upgrade');
+        } else if (data.reply) {
+          showMessage('bot', data.reply);
+        } else if (data.error) {
+          showMessage('bot', 'Erreur temporaire. Réessayez ou contactez-nous sur WhatsApp.', 'error');
+        }
+      })
+      .catch(function() {
+        hideTyping();
+        showMessage('bot', 'Je suis temporairement indisponible. Contactez-nous sur WhatsApp : https://wa.me/212607798670', 'error');
+      });
+    }
   }
-
-  function showUpgradePrompt(){
-    upgradeDiv.style.display = 'block';
-    win.classList.add('cbw-reached');
-  }
-
-  // ── Window controls ──
-  function openChat(){
-    if(isOpen) return;
-    isOpen = true;
-    fab.classList.add('hidden');
-    win.classList.remove('cbw-closed');
-    emailDiv.style.display = emailCollected ? 'none' : 'block';
-    inputArea.style.display = emailCollected ? 'flex' : 'none';
-    counterDiv.style.display = emailCollected ? 'block' : 'none';
-    if(emailCollected) textInput.focus();
-  }
-
-  function closeChat(){
-    isOpen = false;
-    isMinimized = false;
-    fab.classList.remove('hidden');
-    win.classList.add('cbw-closed');
-    win.classList.remove('cbw-minimized');
-  }
-
-  function toggleMinimize(){
-    isMinimized = !isMinimized;
-    win.classList.toggle('cbw-minimized', isMinimized);
-    btnMin.innerHTML = isMinimized ? '+' : '−';
-  }
-
+  
+  // Auto-open apres 30s si pas encore interacte
+  setTimeout(function() {
+    if (!widgetOpen && !emailCollected) {
+      launcher.style.animation = 'ia-pulse 2s infinite';
+    }
+  }, 30000);
+  
+  // Ajouter animation pulse
+  var animStyle = document.createElement('style');
+  animStyle.textContent = '@keyframes ia-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}';
+  document.head.appendChild(animStyle);
+  
 })();
