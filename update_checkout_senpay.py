@@ -1,4 +1,69 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+"""
+IA Business Solutions - Mise a jour Checkout avec SenePay + tarifs XOF
+"""
+import os, re
+
+OUTPUT_DIR = "/home/dom/ia-boutique/dist"
+
+# SenePay Merchant ID
+SENPAY_MERCHANT_ID = "72"  # Maurice Olympio
+
+# Tarifs XOF (1 EUR ≈ 655 XOF)
+TARIFS_XOF = {
+    # Chatbot
+    "chatbot-free": {"name": "Chatbot IA — Gratuit", "xof": 0, "period": "mois", "desc": "10 messages/jour, watermark"},
+    "chatbot-pro": {"name": "Chatbot IA — Pro", "xof": 19000, "period": "mois", "desc": "5,000 messages/mois, pas de watermark"},
+    "chatbot-biz": {"name": "Chatbot IA — Business", "xof": 65000, "period": "mois", "desc": "50,000 messages, multi-langues"},
+    # SEO
+    "seo-starter": {"name": "Assistant SEO — Starter", "xof": 12500, "period": "mois", "desc": "10 articles/mois"},
+    "seo-pro": {"name": "Assistant SEO — Pro", "xof": 32000, "period": "mois", "desc": "50 articles, export WP/Shopify"},
+    "seo-biz": {"name": "Assistant SEO — Business", "xof": 65000, "period": "mois", "desc": "Articles illimités, API"},
+    # Support
+    "support-pro": {"name": "Agent Support — Starter", "xof": 65000, "period": "mois", "desc": "500 résolutions/mois"},
+    "support-biz": {"name": "Agent Support — Pro", "xof": 196000, "period": "mois", "desc": "5,000 résolutions, multi-canal"},
+    # Réunions
+    "reunions-starter": {"name": "Résumeur Réunions — Starter", "xof": 6000, "period": "mois", "desc": "5 heures/mois"},
+    "reunions-pro": {"name": "Résumeur Réunions — Pro", "xof": 19000, "period": "mois", "desc": "20 heures, Notion/Slack"},
+    # Données
+    "data-free": {"name": "Analyste Données — Gratuit", "xof": 0, "period": "mois", "desc": "100 requêtes/mois"},
+    "data-pro": {"name": "Analyste Données — Pro", "xof": 32000, "period": "mois", "desc": "2,000 requêtes"},
+    "data-biz": {"name": "Analyste Données — Business", "xof": 97500, "period": "mois", "desc": "Illimité, équipe, API"},
+    # Contrats
+    "contrats-unit": {"name": "Analyse Contrats — à l'unité", "xof": 6000, "unit": True, "desc": "1 document"},
+    "contrats-pro": {"name": "Analyse Contrats — Pro", "xof": 19000, "period": "mois", "desc": "20 documents/mois"},
+    # Vidéos
+    "videos-starter": {"name": "Vidéos Courtes — Starter", "xof": 12500, "period": "mois", "desc": "5 vidéos/mois"},
+    "videos-pro": {"name": "Vidéos Courtes — Pro", "xof": 32000, "period": "mois", "desc": "30 vidéos, publication auto"},
+    # Recrutement
+    "rh-unit": {"name": "Recrutement IA — à l'unité", "xof": 32000, "unit": True, "desc": "1 offre d'emploi"},
+    "rh-pro": {"name": "Recrutement IA — Pro", "xof": 97500, "period": "mois", "desc": "Offres illimitées"},
+    # Traducteur
+    "trad-starter": {"name": "Traducteur IA — Starter", "xof": 12500, "period": "mois", "desc": "10,000 mots/mois"},
+    "trad-pro": {"name": "Traducteur IA — Pro", "xof": 32000, "period": "mois", "desc": "50,000 mots, API"},
+    # Landing Pages
+    "landing-unit": {"name": "Landing Page — à l'unité", "xof": 19000, "unit": True, "desc": "1 page"},
+    "landing-pro": {"name": "Landing Pages — Pro", "xof": 65000, "period": "mois", "desc": "10 pages/mois"},
+}
+
+def generate_senpay_button(product_id, product_name, amount_xof):
+    """Generate SenePay payment button HTML"""
+    if amount_xof == 0:
+        return f'<a href="#" class="btn btn-p" style="width:100%;justify-content:center" onclick="startFreeTrial(\'{product_id}\')">🧪 Essai gratuit 7 jours</a>'
+    
+    return f"""
+    <form action="https://sene-pay.com/payment/{SENPAY_MERCHANT_ID}" method="POST" target="_blank">
+        <input type="hidden" name="product_id" value="{product_id}">
+        <input type="hidden" name="product_name" value="{product_name}">
+        <input type="hidden" name="amount" value="{amount_xof}">
+        <input type="hidden" name="currency" value="XOF">
+        <button type="submit" class="btn btn-p" style="width:100%;justify-content:center">💳 Payer {amount_xof:,} XOF via SenePay</button>
+    </form>
+    <p style="text-align:center;font-size:.75rem;color:var(--text2);margin-top:8px">ou virement (voir RIB ci-dessous)</p>
+    """
+
+# Generate the checkout page with XOF prices and SenePay
+checkout_html = '''<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -217,7 +282,7 @@ Paiement par carte, Mobile Money, Wave, Orange Money
 </footer>
 
 <script>
-var senpayMerchant="72";
+var senpayMerchant="''' + SENPAY_MERCHANT_ID + '''";
 var currentProduct=null;
 function goStep(n){
 document.getElementById('step1').classList.toggle('hidden',n!==1);
@@ -253,7 +318,7 @@ html+='<div class="summary-row"><span>Activation</span><span>Sous 24h</span></di
 document.getElementById('summaryBox').innerHTML=html;
 var senpayBtn=document.getElementById('paySenpay');
 if(finalTotal===0){
-senpayBtn.innerHTML='<a href="#" class="btn btn-p" style="width:100%" onclick="startFreeTrial(\''+id+'\')">🧪 Lancer l\'essai gratuit 7 jours</a>';
+senpayBtn.innerHTML='<a href="#" class="btn btn-p" style="width:100%" onclick="startFreeTrial(\\''+id+'\\')">🧪 Lancer l\\'essai gratuit 7 jours</a>';
 }else{
 senpayBtn.innerHTML='<form action="https://sene-pay.com/payment/'+senpayMerchant+'" method="POST" target="_blank"><input type="hidden" name="product_id" value="'+id+'"><input type="hidden" name="product_name" value="'+name+'"><input type="hidden" name="amount" value="'+finalTotal+'"><input type="hidden" name="currency" value="XOF"><button type="submit" class="btn btn-s" style="width:100%">💳 Payer '+finalTotal.toLocaleString()+' XOF via SenePay</button></form><p style="text-align:center;font-size:.75rem;color:var(--text2);margin-top:8px">Carte, Mobile Money, Wave, Orange Money</p>';
 }
@@ -261,7 +326,11 @@ var waLink='https://wa.me/212607798670?text=Bonjour%20Dominiqk,%20j%27ai%20pay%C
 document.getElementById('whatsappProof').href=waLink;
 }
 function startFreeTrial(productId){
-alert('Essai gratuit activé ! Vous recevrez vos accès par email dans 5 minutes.\n\nPlan : '+productId+'\nDurée : 7 jours\nAucun paiement requis.');
+alert('Essai gratuit activé ! Vous recevrez vos accès par email dans 5 minutes.\\n\\nPlan : '+productId+'\\nDurée : 7 jours\\nAucun paiement requis.');
 }
 </script>
-</body></html>
+</body></html>'''
+
+with open(f"{OUTPUT_DIR}/checkout.html", "w", encoding="utf-8") as f:
+    f.write(checkout_html)
+print(f"✅ Checkout updated: {len(checkout_html)} bytes")
