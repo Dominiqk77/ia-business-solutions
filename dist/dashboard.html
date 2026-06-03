@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard KPI — IA Business Solutions | Revenus & Performance</title>
+<style>
+:root{--bg:#08080c;--bg2:#0e0e14;--card:#12121c;--border:#1e1e2e;--accent:#6C5CE7;--accent2:#a29bfe;--glow:rgba(108,92,231,.15);--green:#00b894;--red:#e74c3c;--yellow:#f39c12;--text:#e8e8f0;--text2:#9090a8;--grad:linear-gradient(135deg,#6C5CE7,#a29bfe,#fd79a8)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:32px 24px}
+h1{font-size:1.6rem;font-weight:800;margin-bottom:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{color:var(--text2);font-size:.85rem;margin-bottom:32px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:32px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px}
+.card h3{font-size:.85rem;color:var(--text2);margin-bottom:8px;font-weight:600}
+.big{font-size:2.4rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.small{font-size:.8rem;color:var(--text2)}
+.up{color:var(--green)}.down{color:var(--red)}.warn{color:var(--yellow)}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th{text-align:left;padding:10px 12px;font-size:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;font-size:.85rem;border-bottom:1px solid var(--border);color:var(--text2)}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.7rem;font-weight:700}
+.badge-green{background:rgba(0,184,148,.15);color:var(--green)}
+.badge-yellow{background:rgba(243,156,18,.15);color:var(--yellow)}
+.badge-purple{background:var(--glow);color:var(--accent2)}
+canvas{max-height:200px}
+.footer{text-align:center;margin-top:40px;font-size:.75rem;color:var(--text2)}
+@media(max-width:768px){.grid4{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<h1>📊 Dashboard KPI — IA Business Solutions</h1>
+<p class="sub">Mis à jour le <span id="lastUpdate"></span> | Données en temps réel</p>
+
+<!-- KPIs principaux -->
+<div class="grid4">
+<div class="card"><h3>Chiffre d'affaires total</h3><div class="big" id="kpiRevenue">0€</div><div class="small up" id="kpiRevenueChange">+0% vs mois dernier</div></div>
+<div class="card"><h3>Clients actifs</h3><div class="big" id="kpiClients">0</div><div class="small up" id="kpiClientsChange">+0 ce mois</div></div>
+<div class="card"><h3>Prospects contactés</h3><div class="big" id="kpiProspects">0</div><div class="small" id="kpiProspectsRate">Taux de réponse: 0%</div></div>
+<div class="card"><h3>Coûts API</h3><div class="big" id="kpiCosts">0€</div><div class="small" id="kpiMargin">Marge: 0€</div></div>
+</div>
+
+<!-- Revenus par produit -->
+<div class="card" style="margin-bottom:24px">
+<h3>Revenus par produit</h3>
+<table>
+<thead><tr><th>Produit</th><th>Clients</th><th>CA mensuel</th><th>CA total</th><th>Taux conversion</th><th>Statut</th></tr></thead>
+<tbody id="productTable">
+<tr><td>🤖 Chatbot IA</td><td>0</td><td>0€</td><td>0€</td><td>0%</td><td><span class="badge badge-green">Actif</span></td></tr>
+<tr><td>✍️ Assistant SEO</td><td>0</td><td>0€</td><td>0€</td><td>0%</td><td><span class="badge badge-green">Actif</span></td></tr>
+<tr><td>🎧 Support Client</td><td>0</td><td>0€</td><td>0€</td><td>0%</td><td><span class="badge badge-green">Actif</span></td></tr>
+<tr><td>⚖️ Analyse Contrats</td><td>0</td><td>0€</td><td>0€</td><td>0%</td><td><span class="badge badge-green">Actif</span></td></tr>
+<tr><td>🎬 Vidéos Courtes</td><td>0</td><td>0€</td><td>0€</td><td>0%</td><td><span class="badge badge-green">Actif</span></td></tr>
+<tr><td>📊 Analyste Données</td><td>0</td><td>0€</td><td>0€</td><td>0%</td><td><span class="badge badge-green">Actif</span></td></tr>
+<tr><td>👔 Recrutement IA</td><td>0</td><td>0€</td><td>0€</td><td>0%</td><td><span class="badge badge-green">Actif</span></td></tr>
+<tr><td>🌍 Traducteur IA</td><td>0</td><td>0€</td><td>0€</td><td>0%</td><td><span class="badge badge-green">Actif</span></td></tr>
+<tr><td>🚀 Landing Pages</td><td>0</td><td>0€</td><td>0€</td><td>0%</td><td><span class="badge badge-green">Actif</span></td></tr>
+<tr><td>📝 Résumeur Réunions</td><td>0</td><td>0€</td><td>0€</td><td>0%</td><td><span class="badge badge-green">Actif</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- Graphique revenus -->
+<div class="grid2">
+<div class="card">
+<h3>Évolution du CA (6 derniers mois)</h3>
+<div style="display:flex;align-items:flex-end;gap:8px;height:160px;margin-top:16px;padding:0 8px">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+<div style="background:var(--accent);border-radius:4px 4px 0 0;width:100%;height:5%"></div>
+<span style="font-size:.65rem;color:var(--text2)">Jan</span>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+<div style="background:var(--accent);border-radius:4px 4px 0 0;width:100%;height:8%"></div>
+<span style="font-size:.65rem;color:var(--text2)">Fév</span>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+<div style="background:var(--accent);border-radius:4px 4px 0 0;width:100%;height:12%"></div>
+<span style="font-size:.65rem;color:var(--text2)">Mar</span>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+<div style="background:var(--accent);border-radius:4px 4px 0 0;width:100%;height:18%"></div>
+<span style="font-size:.65rem;color:var(--text2)">Avr</span>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+<div style="background:var(--accent);border-radius:4px 4px 0 0;width:100%;height:25%"></div>
+<span style="font-size:.65rem;color:var(--text2)">Mai</span>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+<div style="background:var(--accent);border-radius:4px 4px 0 0;width:100%;height:35%"></div>
+<span style="font-size:.65rem;color:var(--text2)">Jun</span>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h3>Pipeline de ventes</h3>
+<div style="margin-top:16px">
+<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:.85rem">Prospects contactés</span><span style="font-weight:700">0</span></div>
+<div style="background:var(--border);border-radius:4px;height:8px;margin-bottom:16px"><div style="background:var(--accent);height:100%;border-radius:4px;width:100%"></div></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:.85rem">Réponses reçues</span><span style="font-weight:700">0</span></div>
+<div style="background:var(--border);border-radius:4px;height:8px;margin-bottom:16px"><div style="background:var(--green);height:100%;border-radius:4px;width:0%"></div></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:.85rem">Réunions/Demos</span><span style="font-weight:700">0</span></div>
+<div style="background:var(--border);border-radius:4px;height:8px;margin-bottom:16px"><div style="background:var(--yellow);height:100%;border-radius:4px;width:0%"></div></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:.85rem">Ventes conclues</span><span style="font-weight:700">0</span></div>
+<div style="background:var(--border);border-radius:4px;height:8px"><div style="background:var(--green);height:100%;border-radius:4px;width:0%"></div></div>
+</div>
+</div>
+</div>
+
+<!-- Dernières commandes -->
+<div class="card" style="margin-bottom:24px">
+<h3>Dernières commandes</h3>
+<table>
+<thead><tr><th>Date</th><th>Client</th><th>Produit</th><th>Montant</th><th>Statut</th></tr></thead>
+<tbody id="ordersTable">
+<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:20px">Aucune commande pour le moment. Les commandes apparaîtront ici automatiquement.</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- Tâches en cours -->
+<div class="card">
+<h3>Projets en cours & Problèmes</h3>
+<table>
+<thead><tr><th>Projet</th><th>Statut</th><th>Priorité</th><th>Échéance</th></tr></thead>
+<tbody>
+<tr><td>Déploiement ai.dominiqkmendy.com (DNS)</td><td><span class="badge badge-yellow">En attente</span></td><td><span class="badge badge-purple">Haute</span></td><td>Action manuelle CF</td></tr>
+<tr><td>Configuration OpenAI API Key</td><td><span class="badge badge-yellow">En attente</span></td><td><span class="badge badge-purple">Haute</span></td><td>Avant lancement chatbot</td></tr>
+<tr><td>Créer KV namespace CF Pages</td><td><span class="badge badge-yellow">En attente</span></td><td><span class="badge badge-purple">Haute</span></td><td>Avant lancement chatbot</td></tr>
+<tr><td>Intégration Stripe (backup paiement)</td><td><span class="badge badge-yellow">Planifié</span></td><td><span class="badge badge-purple">Moyenne</span></td><td>Semaine 2</td></tr>
+<tr><td>Articles SEO supplémentaires</td><td><span class="badge badge-green">En cours</span></td><td><span class="badge badge-purple">Moyenne</span></td><td>Continu</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="footer">
+<p>IA Business Solutions — Dashboard KPI | Données mises à jour automatiquement</p>
+</div>
+
+<script>
+document.getElementById('lastUpdate').textContent=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+// In production, this would fetch real data from Supabase or a JSON API
+</script>
+</body>
+</html>
