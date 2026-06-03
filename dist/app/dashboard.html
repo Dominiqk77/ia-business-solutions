@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Dashboard — IA Business Solutions</title>
+<style>
+:root{--bg:#08080c;--bg2:#0e0e14;--card:#12121c;--border:#1e1e2e;--accent:#6C5CE7;--accent2:#a29bfe;--glow:rgba(108,92,231,.15);--green:#00b894;--text:#e8e8f0;--text2:#9090a8}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+a{color:inherit;text-decoration:none}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:420px;text-align:center}
+.login-box h1{font-size:1.4rem;margin-bottom:8px}
+.login-box p{color:var(--text2);font-size:.88rem;margin-bottom:24px}
+input{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:.9rem;margin-bottom:12px;font-family:inherit}
+input:focus{outline:none;border-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 28px;border-radius:10px;font-size:.9rem;font-weight:700;border:none;cursor:pointer;transition:.3s;width:100%}
+.btn-p{background:var(--accent);color:#fff}
+.btn-p:hover{background:var(--accent2)}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--card);border-right:1px solid var(--border);padding:20px 0;z-index:50}
+.sidebar .logo{font-size:1.1rem;font-weight:800;padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:16px;color:var(--accent)}
+.sidebar nav a{display:block;padding:10px 20px;color:var(--text2);font-size:.85rem;transition:.3s;border-left:3px solid transparent}
+.sidebar nav a:hover,.sidebar nav a.active{color:var(--text);background:var(--glow);border-left-color:var(--accent)}
+.main{margin-left:240px;padding:32px;min-height:100vh}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+.header h1{font-size:1.5rem;font-weight:700}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px}
+.card h3{margin-bottom:8px;font-size:1rem}
+.card p{font-size:.88rem;color:var(--text2)}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.stat{font-size:2rem;font-weight:800;color:var(--accent)}
+.stat-l{font-size:.8rem;color:var(--text2)}
+.widget-code{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;font-family:'Courier New',monospace;font-size:.78rem;word-break:break-all;position:relative;margin:16px 0}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;border:none;padding:4px 12px;border-radius:6px;font-size:.7rem;cursor:pointer}
+.upload-area{border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:.3s}
+.upload-area:hover{border-color:var(--accent);background:var(--glow)}
+.upload-area input{display:none}
+.config-form label{display:block;font-size:.85rem;font-weight:600;margin:16px 0 6px}
+.config-form input,.config-form textarea,.config-form select{margin-bottom:4px}
+textarea{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:.9rem;font-family:inherit;resize:vertical;min-height:100px}
+select{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:.9rem}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE (shown by default) -->
+<div class="login-wrap" id="loginPage">
+<div class="login-box">
+<div style="font-size:2.5rem;margin-bottom:12px">🤖</div>
+<h1>IA Business Solutions</h1>
+<p>Connectez-vous à votre espace client</p>
+<form id="loginForm" onsubmit="return handleLogin(event)">
+<input type="email" id="loginEmail" placeholder="Votre email" required>
+<input type="password" id="loginPassword" placeholder="Mot de passe" required>
+<button type="submit" class="btn btn-p">Se connecter →</button>
+</form>
+<p style="margin-top:16px;font-size:.8rem;color:var(--text2)">
+Mot de passe oublié ? <a href="mailto:ia@dominiqkmendy.com" style="color:var(--accent)">Contactez-nous</a>
+</p>
+<p style="font-size:.75rem;color:var(--text2);margin-top:8px">
+Nouveau client ? <a href="https://ai.dominiqkmendy.com/#tarifs" style="color:var(--accent)">Créez votre compte</a>
+</p>
+</div>
+</div>
+
+<!-- DASHBOARD (shown after login) -->
+<div id="dashboard" style="display:none">
+<div class="sidebar">
+<div class="logo">🤖 Mes Solutions IA</div>
+<nav>
+<a href="#" class="active" onclick="showTab('overview',this)">📊 Vue d'ensemble</a>
+<a href="#" onclick="showTab('chatbot',this)">🤖 Mon Chatbot</a>
+<a href="#" onclick="showTab('configure',this)">⚙️ Configuration</a>
+<a href="#" onclick="showTab('stats',this)">📈 Statistiques</a>
+<a href="#" onclick="showTab('billing',this)">💳 Facturation</a>
+<a href="#" onclick="showTab('support',this)">🆘 Support</a>
+<a href="#" onclick="handleLogout()" style="color:#e74c3c">🚪 Déconnexion</a>
+</nav>
+</div>
+
+<div class="main">
+
+<!-- TAB: OVERVIEW -->
+<div id="tab-overview" class="tab-content">
+<div class="header">
+<h1>Vue d'ensemble</h1>
+<span style="color:var(--text2);font-size:.85rem">Bienvenue, <span id="userName">Client</span></span>
+</div>
+<div class="grid3">
+<div class="card"><div class="stat" id="statConversations">0</div><div class="stat-l">Conversations ce mois</div></div>
+<div class="card"><div class="stat" id="statLeads">0</div><div class="stat-l">Leads collectés</div></div>
+<div class="card"><div class="stat" id="statPlan">Free</div><div class="stat-l">Plan actuel</div></div>
+</div>
+<div class="card" style="margin-top:20px">
+<h3>🚀 Démarrage rapide</h3>
+<p>Configurez votre chatbot IA en 3 étapes :</p>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px">
+<div style="background:var(--bg);padding:16px;border-radius:10px"><div style="font-weight:700;margin-bottom:4px">1. Uploadez vos données</div><div style="font-size:.8rem;color:var(--text2)">PDF, FAQ, URL de votre site</div></div>
+<div style="background:var(--bg);padding:16px;border-radius:10px"><div style="font-weight:700;margin-bottom:4px">2. Personnalisez</div><div style="font-size:.8rem;color:var(--text2)">Couleur, message d'accueil, ton</div></div>
+<div style="background:var(--bg);padding:16px;border-radius:10px"><div style="font-weight:700;margin-bottom:4px">3. Copiez le widget</div><div style="font-size:.8rem;color:var(--text2)">Collez le code sur votre site</div></div>
+</div>
+</div>
+</div>
+
+<!-- TAB: CHATBOT -->
+<div id="tab-chatbot" class="tab-content" style="display:none">
+<div class="header"><h1>Mon Chatbot IA</h1></div>
+<div class="card">
+<h3>Code widget à copier sur votre site</h3>
+<p style="font-size:.85rem;color:var(--text2);margin-bottom:12px">Collez ce code juste avant la balise <code>&lt;/body&gt;</code> de votre site :</p>
+<div class="widget-code">
+<button class="copy-btn" onclick="copyWidgetCode()">Copier</button>
+<code id="widgetCode">&lt;script src="https://ai.dominiqkmendy.com/widget/chatbot-widget.js" data-bot-id="BOT_ID" data-theme="dark"&gt;&lt;/script&gt;</code>
+</div>
+<div style="margin-top:16px">
+<a href="#" class="btn btn-p" onclick="testWidget()" style="width:auto;padding:10px 24px;font-size:.85rm">👀 Tester le widget</a>
+<a href="#" class="btn btn-p" style="width:auto;padding:10px 24px;font-size:.85rem;background:transparent;border:1px solid var(--accent);color:var(--accent)" onclick="configureBot()">⚙️ Configurer</a>
+</div>
+</div>
+<div class="card">
+<h3>Live Preview</h3>
+<p style="font-size:.85rem;color:var(--text2)">Votre chatbot en action :</p>
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-width:400px;margin-top:12px">
+<div style="background:var(--accent);padding:10px 14px;font-weight:700;font-size:.85rem;color:#fff">💬 Chatbot — Votre Entreprise</div>
+<div style="padding:14px;min-height:150px">
+<div style="background:var(--bg);padding:8px 12px;border-radius:10px;margin-bottom:8px;font-size:.82rem">Bonjour ! Comment puis-je vous aider aujourd'hui ?</div>
+<div style="background:var(--accent);color:#fff;padding:8px 12px;border-radius:10px;font-size:.82rem;text-align:right;margin-left:40px">Bonjour, j'aurais besoin d'informations sur vos services</div>
+</div>
+<div style="display:flex;border-top:1px solid var(--border)">
+<input type="text" placeholder="Tapez un message..." style="flex:1;border:none;border-radius:0;background:var(--card);padding:10px 14px">
+<button style="background:var(--accent);color:#fff;border:none;padding:10px 16px;cursor:pointer;font-weight:700">Envoyer</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- TAB: CONFIGURE -->
+<div id="tab-configure" class="tab-content" style="display:none">
+<div class="header"><h1>Configuration</h1></div>
+<form class="config-form" onsubmit="return saveConfig(event)">
+<div class="card">
+<h3>Informations de l'entreprise</h3>
+<label>Nom de l'entreprise</label>
+<input type="text" id="cfgCompany" placeholder="Votre Entreprise SARL">
+<label>Description de l'entreprise</label>
+<textarea id="cfgDescription" rows="3" placeholder="Décrivez votre activité en quelques phrases..."></textarea>
+</div>
+<div class="card">
+<h3>Message d'accueil</h3>
+<label>Message affiché aux visiteurs</label>
+<input type="text" id="cfgWelcome" placeholder="Bonjour ! Comment puis-je vous aider ?">
+<label>Ton du chatbot</label>
+<select id="cfgTone">
+<option value="professional">Professionnel (recommandé)</option>
+<option value="friendly">Amical et décontracté</option>
+<option value="formal">Formel et corporate</option>
+</select>
+</div>
+<div class="card">
+<h3>Personnalisation visuelle</h3>
+<label>Couleur principale</label>
+<input type="color" id="cfgColor" value="#6C5CE7" style="width:60px;height:40px;padding:2px;border-radius:6px">
+<label>Langue principale</label>
+<select id="cfgLanguage">
+<option value="fr">Français</option>
+<option value="en">English</option>
+<option value="ar">Arabe</option>
+<option value="es">Español</option>
+</select>
+</div>
+<div class="card">
+<h3>Base de connaissances</h3>
+<p style="font-size:.85rem;color:var(--text2)">Uploadez vos documents pour entraîner le chatbot :</p>
+<div class="upload-area" onclick="document.getElementById('fileInput').click()">
+<div style="font-size:2rem;margin-bottom:8px">📁</div>
+<div style="font-weight:700">Cliquez pour uploader</div>
+<div style="font-size:.8rem;color:var(--text2)">PDF, TXT, DOCX — Max 10MB par fichier</div>
+<input type="file" id="fileInput" multiple accept=".pdf,.txt,.docx" style="display:none" onchange="handleFileUpload(this)">
+</div>
+<div id="uploadedFiles" style="margin-top:12px"></div>
+</div>
+<div class="card">
+<h3>URL du site web (optionnel)</h3>
+<label>L'IA lira votre site pour extraire les informations</label>
+<input type="url" id="cfgWebsite" placeholder="https://votre-site.com">
+</div>
+<button type="submit" class="btn btn-p" style="width:auto;padding:14px 40px;margin-top:16px">💾 Sauvegarder la configuration</button>
+</form>
+</div>
+
+<!-- TAB: STATS -->
+<div id="tab-stats" class="tab-content" style="display:none">
+<div class="header"><h1>Statistiques</h1></div>
+<div class="grid3">
+<div class="card"><div class="stat">0</div><div class="stat-l">Conversations aujourd'hui</div></div>
+<div class="card"><div class="stat">0</div><div class="stat-l">Conversations ce mois</div></div>
+<div class="card"><div class="stat">0</div><div class="stat-l">Leads collectés</div></div>
+</div>
+<div class="card">
+<h3>Répartition par jour (7 derniers jours)</h3>
+<div style="display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:16px">
+<div style="flex:1;background:var(--accent);height:60%;border-radius:4px 4px 0 0;min-width:30px" title="Lun: 12"></div>
+<div style="flex:1;background:var(--accent);height:80%;border-radius:4px 4px 0 0;min-width:30px" title="Mar: 18"></div>
+<div style="flex:1;background:var(--accent);height:45%;border-radius:4px 4px 0 0;min-width:30px" title="Mer: 8"></div>
+<div style="flex:1;background:var(--accent);height:90%;border-radius:4px 4px 0 0;min-width:30px" title="Jeu: 22"></div>
+<div style="flex:1;background:var(--accent);height:70%;border-radius:4px 4px 0 0;min-width:30px" title="Ven: 15"></div>
+<div style="flex:1;background:var(--accent);height:30%;border-radius:4px 4px 0 0;min-width:30px" title="Sam: 5"></div>
+<div style="flex:1;background:var(--accent);height:20%;border-radius:4px 4px 0 0;min-width:30px" title="Dim: 3"></div>
+</div>
+<div style="display:flex;gap:8px;margin-top:4px;font-size:.7rem;color:var(--text2)">
+<div style="flex:1;text-align:center">Lun</div><div style="flex:1;text-align:center">Mar</div><div style="flex:1;text-align:center">Mer</div><div style="flex:1;text-align:center">Jeu</div><div style="flex:1;text-align:center">Ven</div><div style="flex:1;text-align:center">Sam</div><div style="flex:1;text-align:center">Dim</div>
+</div>
+</div>
+<div class="card">
+<h3>Questions les plus fréquentes</h3>
+<ul style="list-style:none;margin-top:12px">
+<li style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>Quels sont vos tarifs ?</span><span style="color:var(--accent);font-weight:700">23x</span></li>
+<li style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>Comment démarrer ?</span><span style="color:var(--accent);font-weight:700">18x</span></li>
+<li style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>Horaires d'ouverture</span><span style="color:var(--accent);font-weight:700">12x</span></li>
+</ul>
+</div>
+</div>
+
+<!-- TAB: BILLING -->
+<div id="tab-billing" style="display:none" class="tab-content">
+<div class="header"><h1>Facturation</h1></div>
+<div class="card">
+<h3>Plan actuel : <span style="color:var(--accent)">Free</span></h3>
+<p style="font-size:.88rem;color:var(--text2)">10 messages/jour — Watermark actif</p>
+<div style="margin-top:16px">
+<a href="https://ai.dominiqkmendy.com/#tarifs" class="btn btn-p" style="width:auto">⬆️ Upgrader vers Pro (29€/mois)</a>
+</div>
+</div>
+<div class="card">
+<h3>Historique des factures</h3>
+<table style="width:100%;border-collapse:collapse;margin-top:12px">
+<tr style="text-align:left;border-bottom:1px solid var(--border)"><th style="padding:8px;font-size:.8rem;color:var(--text2)">N°</th><th style="padding:8px;font-size:.8rem;color:var(--text2)">Date</th><th style="padding:8px;font-size:.8rem;color:var(--text2)">Montant</th><th style="padding:8px;font-size:.8rem;color:var(--text2)">Statut</th></tr>
+<tr><td colspan="4" style="padding:16px;text-align:center;color:var(--text2);font-size:.85rem">Aucune facture pour le moment</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>Informations de paiement</h3>
+<p style="font-size:.85rem;color:var(--text2)">Pour upgrader, effectuez un virement vers :</p>
+<div style="background:var(--bg2);padding:12px;border-radius:8px;font-family:'Courier New',monospace;font-size:.75rem;margin:8px 0">
+<strong>CIH Bank</strong> — ZINEB FARES<br>
+IBAN : MA64 2304 5053 3369 4214 0020 0092<br>
+SWIFT : CIHMMAMC
+</div>
+<p style="font-size:.8rem;color:var(--text2)">Envoyez la preuve de paiement à <a href="mailto:ia@dominiqkmendy.com" style="color:var(--accent)">ia@dominiqkmendy.com</a></p>
+</div>
+</div>
+
+<!-- TAB: SUPPORT -->
+<div id="tab-support" style="display:none" class="tab-content">
+<div class="header"><h1>Support</h1></div>
+<div class="card">
+<h3>Besoin d'aide ?</h3>
+<p style="font-size:.88rem;color:var(--text2);margin-bottom:16px">Notre équipe est disponible pour vous aider.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+<a href="https://wa.me/212607798670?text=Bonjour%20j%20ai%20besoin%20d%20aide%20avec%20mon%20chatbot" target="_blank" style="background:var(--bg);padding:16px;border-radius:12px;text-align:center">
+<div style="font-size:1.5rem">💬</div>
+<div style="font-weight:700;margin:8px 0 4px">WhatsApp</div>
+<div style="font-size:.78rem;color:var(--text2)">Réponse en 1h</div>
+</a>
+<a href="mailto:ia@dominiqkmendy.com?subject=Support%20Chatbot%20IA" style="background:var(--bg);padding:16px;border-radius:12px;text-align:center">
+<div style="font-size:1.5rem">📧</div>
+<div style="font-weight:700;margin:8px 0 4px">Email</div>
+<div style="font-size:.78rem;color:var(--text2)">Réponse en 24h</div>
+</a>
+<a href="https://ai.dominiqkmendy.com/#tarifs" style="background:var(--bg);padding:16px;border-radius:12px;text-align:center">
+<div style="font-size:1.5rem">📚</div>
+<div style="font-weight:700;margin:8px 0 4px">Documentation</div>
+<div style="font-size:.78rem;color:var(--text2)">Guides et FAQ</div>
+</a>
+</div>
+</div>
+<div class="card">
+<h3>FAQ rapide</h3>
+<div style="margin-top:12px">
+<details style="margin-bottom:8px"><summary style="cursor:pointer;font-weight:600;padding:8px 0">Comment modifier le message d'accueil ?</summary><p style="padding:8px 0 8px 16px;color:var(--text2);font-size:.85rem">Allez dans Configuration → Message d'accueil. Modifiez le texte et sauvegardez.</p></details>
+<details style="margin-bottom:8px"><summary style="cursor:pointer;font-weight:600;padding:8px 0">Comment ajouter des documents ?</summary><p style="padding:8px 0 8px 16px;color:var(--text2);font-size:.85rem">Dans Configuration → Base de connaissances, uploadez vos PDF ou collez l'URL de votre site.</p></details>
+<details style="margin-bottom:8px"><summary style="cursor:pointer;font-weight:600;padding:8px 0">Comment upgrader mon plan ?</summary><p style="padding:8px 0 8px 16px;color:var(--text2);font-size:.85rem">Allez dans Facturation → Upgrader. Effectuez le virement et envoyez la preuve.</p></details>
+<details style="margin-bottom:8px"><summary style="cursor:pointer;font-weight:600;padding:8px 0">Le bot ne répond pas correctement</summary><p style="padding:8px 0 8px 16px;color:var(--text2);font-size:.85rem">Ajoutez plus de documents dans la base de connaissances. Plus il a d'informations, mieux il répond.</p></details>
+</div>
+</div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /dashboard -->
+
+<script>
+// Simple auth (demo — in production, use proper backend auth)
+function handleLogin(e){
+e.preventDefault();
+var email=document.getElementById('loginEmail').value;
+var pass=document.getElementById('loginPassword').value;
+// Demo: accept any email/password combo with min length
+if(email.length>3 && pass.length>3){
+document.getElementById('loginPage').style.display='none';
+document.getElementById('dashboard').style.display='block';
+document.getElementById('userName').textContent=email.split('@')[0];
+// Store in session
+sessionStorage.setItem('ia_user', email);
+}
+return false;
+}
+function handleLogout(){
+document.getElementById('loginPage').style.display='flex';
+document.getElementById('dashboard').style.display='none';
+sessionStorage.removeItem('ia_user');
+}
+function showTab(tab, el){
+document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');
+document.getElementById('tab-'+tab).style.display='block';
+document.querySelectorAll('.sidebar nav a').forEach(a=>a.classList.remove('active'));
+if(el) el.classList.add('active');
+}
+function copyWidgetCode(){
+var code=document.getElementById('widgetCode').textContent;
+navigator.clipboard.writeText(code);
+alert('Code copié ! Collez-le dans votre site.');
+}
+function testWidget(){
+alert('Le widget sera actif une fois le code copié sur votre site.');
+}
+function configureBot(){
+showTab('configure', document.querySelectorAll('.sidebar nav a')[2]);
+}
+function saveConfig(e){
+e.preventDefault();
+alert('Configuration sauvegardée ! (Démo — en production, cela sauvegarde dans la base de données)');
+return false;
+}
+function handleFileUpload(input){
+var files=input.files;
+var html='';
+for(var i=0;i<files.length;i++){
+html+='<div style="background:var(--bg);padding:8px 12px;border-radius:8px;margin:4px 0;font-size:.85rem">📄 '+files[i].name+' <span style="color:var(--green)">✓ Uploadé</span></div>';
+}
+document.getElementById('uploadedFiles').innerHTML=html;
+}
+// Auto-login if session exists
+if(sessionStorage.getItem('ia_user')){
+document.getElementById('loginPage').style.display='none';
+document.getElementById('dashboard').style.display='block';
+document.getElementById('userName').textContent=sessionStorage.getItem('ia_user').split('@')[0];
+}
+</script>
+</body>
+</html>

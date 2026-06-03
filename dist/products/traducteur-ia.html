@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traducteur Automatique Spécialisé IA — Sites & Documents</title>
+<meta name="description" content="Traduisez des sites entiers ou documents en conservant le contexte métier. Pas Google Translate.">
+<link rel="canonical" href="https://ai.dominiqkmendy.com/products/traducteur-ia/">
+<style>
+:root{--bg:#08080c;--bg2:#0e0e14;--card:#12121c;--border:#1e1e2e;--accent:#6C5CE7;--accent2:#a29bfe;--glow:rgba(108,92,231,.15);--green:#00b894;--text:#e8e8f0;--text2:#9090a8;--grad:linear-gradient(135deg,#6C5CE7,#a29bfe,#fd79a8)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+header{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 0;background:rgba(8,8,12,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.hi{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.2rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo small{font-size:.6rem;display:block;font-weight:400;color:var(--text2);-webkit-text-fill-color:var(--text2)}
+.back{color:var(--text2);font-size:.85rem;padding:8px 16px;border-radius:8px;border:1px solid var(--border);transition:.3s}
+.back:hover{border-color:var(--accent);color:var(--text)}
+.hero{padding:140px 24px 60px;text-align:center}
+.hero h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:800;line-height:1.15;margin-bottom:16px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero .sub{max-width:600px;margin:0 auto;font-size:1.05rem;color:var(--text2);margin-bottom:12px}
+.hero .tag{display:inline-block;background:var(--glow);border:1px solid var(--accent);padding:6px 18px;border-radius:20px;font-size:.8rem;color:var(--accent2)}
+.cta-row{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:12px;font-size:.92rem;font-weight:700;border:none;cursor:pointer;transition:.3s}
+.btn-p{background:var(--accent);color:#fff;box-shadow:0 4px 30px rgba(108,92,231,.3)}
+.btn-p:hover{background:var(--accent2);transform:translateY(-2px)}
+.btn-w{background:#25D366;color:#fff}
+section{position:relative;z-index:1}
+.wrap{max-width:1000px;margin:0 auto;padding:80px 24px}
+h2{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;margin-bottom:20px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px}
+.card h3{margin-bottom:8px;font-size:1.05rem}
+.card p{font-size:.88rem;color:var(--text2)}
+.feature-list{list-style:none;margin:20px 0}
+.feature-list li{padding:10px 0;font-size:.9rem;color:var(--text2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.feature-list li:last-child{border-bottom:none}
+.feature-list li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px}
+.step{text-align:center;padding:24px}
+.step-i{width:56px;height:56px;background:var(--glow);border:1px solid var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 14px}
+.step-t{font-weight:700;margin-bottom:6px;font-size:.95rem}
+.step-d{font-size:.83rem;color:var(--text2)}
+.price-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;text-align:center;position:relative}
+.price-card.f{border-color:var(--accent)}
+.pop{position:absolute;top:-10px;right:16px;background:var(--accent);color:#fff;padding:4px 14px;border-radius:20px;font-size:.65rem;font-weight:700}
+.pname{font-size:1.1rem;font-weight:700;margin:8px 0}
+.pamount{font-size:2.2rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pperiod{font-size:.78rem;color:var(--text2)}
+.pfeat{list-style:none;margin:16px 0;text-align:left}
+.pfeat li{padding:5px 0;font-size:.83rem;color:var(--text2);display:flex;align-items:center;gap:8px}
+.pfeat li::before{content:"✓";color:var(--green);font-weight:700}
+.pay-sec{background:linear-gradient(135deg,rgba(108,92,231,.08),rgba(0,184,148,.05));border:1px solid var(--accent);border-radius:20px;padding:32px;margin-top:40px}
+.pay-sec h3{text-align:center;margin-bottom:16px;font-size:1.3rem}
+.pay-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.pay-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.pay-card h4{color:var(--accent);margin-bottom:6px;font-size:.9rem}
+.pay-card p{font-size:.78rem;color:var(--text2);margin:2px 0}
+.rib{font-family:'Courier New',monospace;background:var(--bg2);padding:8px;border-radius:6px;font-size:.72rem;margin:4px 0;word-break:break-all}
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:14px}
+.tstars{color:#ffd700;font-size:.85rem;margin-bottom:8px}
+.ttext{font-size:.85rem;color:var(--text2);margin-bottom:10px;font-style:italic}
+.tauth{font-weight:700;font-size:.83rem}
+.trole{font-size:.75rem;color:var(--text2)}
+.faq-item{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.faq-q{width:100%;padding:16px 20px;background:none;border:none;color:var(--text);font-size:.88rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.faq-open .faq-a{max-height:300px;padding:0 20px 16px}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:.83rem;color:var(--text2)}
+.demo-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;margin:20px 0}
+.chat-win{background:var(--card);border-radius:12px;overflow:hidden;max-width:480px;margin:0 auto}
+.chat-h{background:var(--accent);padding:10px 14px;font-weight:700;font-size:.85rem;display:flex;align-items:center;gap:8px;color:#fff}
+.chat-b{padding:14px;max-height:250px;overflow-y:auto}
+.msg{margin:8px 0;padding:8px 12px;border-radius:10px;font-size:.82rem;line-height:1.5}
+.msg.bot{background:var(--bg2);border:1px solid var(--border)}
+.msg.user{background:var(--accent);color:#fff;text-align:right}
+.final-cta{text-align:center;padding:60px 24px}
+footer{border-top:1px solid var(--border);padding:30px 24px;text-align:center;font-size:.75rem;color:var(--text2);position:relative;z-index:1}
+footer a{color:var(--accent)}
+@media(max-width:768px){.grid2{grid-template-columns:1fr}.hero{padding:110px 24px 40px}}
+</style>
+</head>
+<body>
+<header><div class="hi">
+<a href="https://ai.dominiqkmendy.com/" class="logo">IA Business Solutions<small>by Dominiqk Mendy</small></a>
+<a href="https://ai.dominiqkmendy.com/" class="back">← Retour</a>
+</div></header>
+
+<section class="hero">
+<div style="font-size:3rem;margin-bottom:12px">🌍</div>
+<h1>Traduisez votre site en 30 langues. Sans faux sens.</h1>
+<p class="sub">Vos clients méritent de lire dans leur langue. Sans erreur.</p>
+<div class="tag">19€/mois (10K mots) — 49€/mois (50K mots) — 99€/mois (illimité)</div>
+<div class="cta-row">
+<a href="#tarifs" class="btn btn-p">Voir les tarifs ↓</a>
+<a href="https://wa.me/212607798670?text=Bonjour%20Dominiqk,%20je%20souhaite%20en%20savoir%20plus%20sur%20traducteur%20ia" target="_blank" class="btn btn-w">💬 WhatsApp</a>
+</div>
+</section>
+<section class="wrap"><h2>Fonctionnalités</h2><div class="grid2"><ul class="feature-list"><li>Traduction contextuelle (pas mot-à-mot)</li><li>30+ langues supportées</li><li>Conservation du ton et du style</li><li>Glossaire métier personnalisable</li></ul><ul class="feature-list"><li>API pour traduction en temps réel</li><li>Bulk : traduisez 100 pages d'un coup</li><li>Intégration WordPress, Shopify, Notion</li><li>QA automatique (détection d'erreurs)</li></ul></div></section><section class="wrap"><h2>Ce qu'en disent mes clients</h2><div class="tcard"><div class="tstars">★★★★★</div><div class="ttext">"Notre expansion en Afrique de l'Ouest a été multipliée par 5 grâce à la traduction automatique."</div><div class="tauth">VP International</div><div class="trole">EdTech, France</div></div><div class="tcard"><div class="tstars">★★★★★</div><div class="ttext">"Les traductions sont bien meilleures que Google Translate. Le glossaire métier fait la différence."</div><div class="tauth">Responsable Export</div><div class="trole">Agro, Maroc</div></div></section><section class="wrap" id="tarifs"><h2>Tarifs</h2><div class="grid3"><div class="price-card"><div class="pname">Starter</div><div class="pamount">19€</div><div class="pperiod">mois</div><ul class="pfeat"><li>10,000 mots/mois</li></ul><a href="#contact" class="btn btn-p" style="width:100%;justify-content:center">Choisir ce plan</a><a href="https://wa.me/212607798670?text=Bonjour%20je%20veux%20le%20plan%20Starter" target="_blank" class="btn btn-w" style="width:100%;justify-content:center">💬 WhatsApp</a></div><div class="price-card f"><div class="pop">Populaire</div><div class="pname">Pro</div><div class="pamount">49€</div><div class="pperiod">mois</div><ul class="pfeat"><li>50,000 mots, glossaire, API</li></ul><a href="#contact" class="btn btn-p" style="width:100%;justify-content:center">Choisir ce plan</a><a href="https://wa.me/212607798670?text=Bonjour%20je%20veux%20le%20plan%20Pro" target="_blank" class="btn btn-w" style="width:100%;justify-content:center">💬 WhatsApp</a></div><div class="price-card"><div class="pname">Business</div><div class="pamount">99€</div><div class="pperiod">mois</div><ul class="pfeat"><li>Mots illimités, priority, SLA</li></ul><a href="#contact" class="btn btn-p" style="width:100%;justify-content:center">Choisir ce plan</a><a href="https://wa.me/212607798670?text=Bonjour%20je%20veux%20le%20plan%20Business" target="_blank" class="btn btn-w" style="width:100%;justify-content:center">💬 WhatsApp</a></div></div></section><div class="pay-sec">
+<h3>💳 Informations de paiement</h3>
+<p style="text-align:center;font-size:.85rem;color:var(--text2);margin-bottom:16px">Effectuez un virement vers l'un des comptes suivants. Activation sous 24h après réception.</p>
+<div class="pay-grid">
+<div class="pay-card">
+<h4>Saham Bank (MAD)</h4>
+<p>Titulaire : FARES ZINEB</p>
+<p>Agence : MARRAKECH MAJORELLE</p>
+<div class="rib">RIB : 022 450 0002200029051487 53<br>SWIFT : SGMBMAMC</div>
+</div>
+<div class="pay-card">
+<h4>CIH Bank (MAD)</h4>
+<p>Titulaire : ZINEB FARES</p>
+<p>Agence : MARRAKECH REGENT</p>
+<div class="rib">IBAN : MA64 2304 5053 3369 4214 0020 0092<br>SWIFT : CIHMMAMC</div>
+</div>
+</div>
+<p style="text-align:center;margin-top:16px;font-size:.8rem;color:var(--text2)">Devises acceptées : EUR, USD, GBP, MAD, XOF | Frais à la charge de l'envoyeur</p>
+</div><section class="final-cta">
+<h2 style="font-size:clamp(1.5rem,3vw,2rem);font-weight:800;margin-bottom:16px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Prêt à démarrer ?</h2>
+<p style="color:var(--text2);margin-bottom:24px">Choisissez votre plan et soyez opérationnel en moins de 24h.</p>
+<div class="cta-row">
+<a href="#tarifs" class="btn btn-p">Voir les tarifs ↑</a>
+<a href="https://wa.me/212607798670?text=Bonjour%20Dominiqk,%20je%20souhaite%20d%C3%A9marrer%20avec%20traducteur%20ia" target="_blank" class="btn btn-w">💬 WhatsApp</a>
+</div>
+</section><section class="wrap"><h2>Complétez votre arsenal IA</h2><div class="grid2"><div class="card"><div style="font-size:2rem;margin-bottom:8px">✍️</div><h3>✍️ Optimisez le SEO multilingue</h3><p>Générez des articles SEO optimisés, fiches produits et meta descriptions. Inclut analyse mots-clés e...</p><a href="/products/assistant-seo/" class="btn btn-p" style="width:100%;justify-content:center;margin-top:12px">Découvrir →</a></div></div></section><footer>
+<p>&copy; 2026 Dominiqk Mendy — IA Business Solutions | <a href="https://ai.dominiqkmendy.com">ai.dominiqkmendy.com</a> | <a href="mailto:ia@dominiqkmendy.com">ia@dominiqkmendy.com</a></p>
+</footer>
+<script>
+document.querySelectorAll('.faq-q').forEach(btn=>{
+btn.addEventListener('click',()=>{
+btn.parentElement.classList.toggle('faq-open');
+});
+});
+</script>
+</body></html>
